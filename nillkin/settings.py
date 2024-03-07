@@ -27,8 +27,8 @@ SECRET_KEY = "django-insecure-iu&*y#(u)r41=+pgs_lk7#dkqlphp3hvi20el)0y90d!=8f+8z
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CORS_ORIGIN_WHITELIST = ['http://localhost:3000','http://192.168.1.101:3000']
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000','http://192.168.1.101:3000']
+CORS_ORIGIN_WHITELIST = ['http://localhost:3000','http://192.168.1.101:3000','https://api-ecom1.kantipurinfotech.com']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000','http://192.168.1.101:3000','https://api-ecom1.kantipurinfotech.com']
 
 
 
@@ -98,7 +98,7 @@ DATABASES = {
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',
-        'PORT': 3308,
+        'PORT': 3306,
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',
