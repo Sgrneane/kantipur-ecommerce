@@ -72,7 +72,13 @@ class ProductSerializer(serializers.ModelSerializer):
             ProductHaveImages.objects.create(product=product_instance,**product_image)
         
         for product_color in product_colors:
-            ProductHaveColor.objects.create(product=product_instance,**product_color)
+            color_name = product_color.get('name')
+            try:
+                    color_instance = ProductHaveColor.objects.get(name=color_name)
+            except ProductHaveColor.DoesNotExist:
+                    color_instance = ProductHaveColor.objects.create(name=color_name)
+            product_instance.product_colors.add(color_instance)
+        
         
         return product_instance
 

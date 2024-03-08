@@ -3,6 +3,7 @@ from django.db import models
 from django.urls import reverse
 from account.models import CustomUser
 import uuid
+from datetime import datetime
 from django.utils.text import slugify
 # Create your models here.
 
@@ -31,6 +32,7 @@ class Brand(models.Model):
     public_id = models.UUIDField(default=uuid.uuid4,editable=False,unique=True)
     name = models.CharField(max_length = 200,null=False)
     slug = models.SlugField(max_length=300,unique=True,blank=True)
+    image = models.ImageField(upload_to='products/Brand',default=None)
     description =  models.CharField(max_length = 2000, null=True)
 
 
@@ -50,7 +52,9 @@ class Category(models.Model):
     public_id = models.UUIDField(default=uuid.uuid4,editable=False,unique=True)
     name = models.CharField(max_length = 200,null=False)
     slug = models.SlugField(max_length=300,unique=True,blank=True)
+    image = models.ImageField(upload_to='products/category',default=None)
     description =  models.CharField(max_length = 2000,null=True)
+
 
 
     def __str__(self):
@@ -81,6 +85,8 @@ class Product(models.Model):
     accessory_type = models.ForeignKey(AccessoriesType,related_name='product_types',on_delete=models.SET_NULL,null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     brand = models.ForeignKey(Brand,related_name = "products",on_delete = models.SET_NULL,null = True)
+    created_date = models.DateTimeField(auto_now_add=True,null=True)
+    updated_date = models.DateTimeField(auto_now=True,null=True)
     
 
 
