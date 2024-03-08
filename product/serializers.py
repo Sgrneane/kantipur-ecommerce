@@ -57,10 +57,24 @@ class ProductHaveImagesSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    product_images = ProductHaveImagesSerializer(many=True)
+    product_colors = ProductHaveColorSerializer(many=True)
 
     class Meta:
         model = Product
         fields ='__all__'
+
+    def create(self,validated_data):
+        product_images = validated_data.pop('product_images', [])
+        product_colors = validated_data.pop('product_colors', [])
+        product_instance = Product.objects.create(**validated_data)
+        for product_image in product_images:
+            ProductHaveImages.objects.create(product=product_instance,**product_image)
+        
+        for product_color in product_colors:
+            ProductHaveColor.objects.create(product=product_instance,**product_color)
+        
+        return product_instance
 
     def get_url(self, obj):
         return obj.get_absolute_url()

@@ -99,7 +99,7 @@ class Product(models.Model):
 #Product Color description
 class ProductHaveColor(models.Model):
     name = models.CharField(max_length=32)
-    product = models.ManyToManyField(Product,related_name = 'product_color')
+    product = models.ManyToManyField(Product,related_name = 'product_colors')
 
     def __str__(self):
         return str(self.name)
