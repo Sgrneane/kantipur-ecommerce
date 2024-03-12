@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 from account.models import CustomUser
 from .models import AccessoriesType, Brand, Category, Product, ProductHaveImages, ProductHaveColor
 
@@ -58,56 +59,32 @@ class ProductHaveImagesSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    product_images = ProductHaveImagesSerializer(many=True)
-    product_colors = ProductHaveColorSerializer(many=True)
+    product_images = serializers.ListField(child=serializers.ImageField(max_length=None, use_url=True))
+    product_colors = serializers.ListField(child=serializers.CharField(max_length=32))
 
     class Meta:
         model = Product
         fields ='__all__'
 
-    def create(self,validated_data):
-        product_images = validated_data.pop('product_images', [])
-        product_colors = validated_data.pop('product_colors', [])
+    def create(self, validated_data):
+        product_images_data = validated_data.pop('product_images', [])
+        product_colors_data = validated_data.pop('product_colors', [])
         product_instance = Product.objects.create(**validated_data)
-        for product_image in product_images:
-            ProductHaveImages.objects.create(product=product_instance,**product_image)
-        
-        for product_color in product_colors:
-            color_name = product_color.get('name')
+
+        for product_image_data in product_images_data:
             try:
-                    color_instance = ProductHaveColor.objects.get(name=color_name)
-            except ProductHaveColor.DoesNotExist:
-                    color_instance = ProductHaveColor.objects.create(name=color_name)
-            product_instance.product_colors.add(color_instance)
-        
-        
+                ProductHaveImages.objects.create(product=product_instance, image=product_image_data)
+            except ValidationError as e:
+                raise serializers.ValidationError({'product_images': e.message})
+
+        for product_color_data in product_colors_data:
+            try:
+                color_instance, created = ProductHaveColor.objects.get_or_create(name=product_color_data)
+                product_instance.product_colors.add(color_instance)
+            except ValidationError as e:
+                raise serializers.ValidationError({'product_colors': e.message})
+
         return product_instance
-    
-
-    def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
-        instance.price = validated_data.get('price', instance.price)
-        # Update other fields similarly...
-
-        product_images_data = validated_data.get('product_images')
-        if product_images_data:
-            instance.product_images.all().delete()
-            for product_image_data in product_images_data:
-                ProductHaveImages.objects.create(product=instance, **product_image_data)
-
-        product_colors_data = validated_data.get('product_colors')
-        if product_colors_data:
-            instance.product_colors.clear()
-            for product_color_data in product_colors_data:
-                color_name = product_color_data.get('name')
-                try:
-                    color_instance = ProductHaveColor.objects.get(name=color_name)
-                except ProductHaveColor.DoesNotExist:
-                    color_instance = ProductHaveColor.objects.create(name=color_name)
-                instance.product_colors.add(color_instance)
-
-        instance.save()
-        return instance
 
     def get_url(self, obj):
         return obj.get_absolute_url()
