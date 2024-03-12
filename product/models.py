@@ -31,9 +31,11 @@ class AccessoriesType(models.Model):
 class Brand(models.Model):
     public_id = models.UUIDField(default=uuid.uuid4,editable=False,unique=True)
     name = models.CharField(max_length = 200,null=False)
+    accessories = models.ManyToManyField(AccessoriesType)
     slug = models.SlugField(max_length=300,unique=True,blank=True)
     image = models.ImageField(upload_to='products/Brand',default=None)
     description =  models.CharField(max_length = 2000, null=True)
+
 
 
     def __str__(self):
@@ -52,7 +54,7 @@ class Category(models.Model):
     public_id = models.UUIDField(default=uuid.uuid4,editable=False,unique=True)
     name = models.CharField(max_length = 200,null=False)
     slug = models.SlugField(max_length=300,unique=True,blank=True)
-    image = models.ImageField(upload_to='products/category',default=None)
+    image = models.ImageField(upload_to='products/category',default=None, null=True)
     description =  models.CharField(max_length = 2000,null=True)
 
 
@@ -66,20 +68,19 @@ class Category(models.Model):
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
-        return reverse('category-detail', kwargs={'slug': self.slug})
+        return reverse('categories', kwargs={'slug': self.slug})
 
 
 #Class to store product
 class Product(models.Model):
     public_id = models.UUIDField(default=uuid.uuid4,editable=False,unique=True) 
-    name = models.CharField(max_length=255,null=False)
-    title = models.CharField(max_length = 1000,null = True)
+    name = models.CharField(max_length=1000,null=False)
     slug = models.SlugField(unique = True,blank=True)
     quantity = models.PositiveIntegerField(default=0)
     discount = models.DecimalField(default=0,max_digits=10, decimal_places=2)
     size = models.CharField(max_length=32,null=True)
     is_publish = models.BooleanField(default = False)
-    thumbnail_image = models.ImageField(upload_to='products/thumbnail_images')
+    thumbnail_image = models.ImageField(upload_to='products/thumbnail_images',blank=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     accessory_type = models.ForeignKey(AccessoriesType,related_name='product_types',on_delete=models.SET_NULL,null=True)

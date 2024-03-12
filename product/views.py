@@ -14,6 +14,7 @@ class BrandViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    related_field = 'slug'
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()

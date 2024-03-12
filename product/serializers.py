@@ -27,6 +27,7 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+        lookup_field = 'slug'
 
     def get_url(self, obj):
         return obj.get_absolute_url()
@@ -81,6 +82,32 @@ class ProductSerializer(serializers.ModelSerializer):
         
         
         return product_instance
+    
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.price = validated_data.get('price', instance.price)
+        # Update other fields similarly...
+
+        product_images_data = validated_data.get('product_images')
+        if product_images_data:
+            instance.product_images.all().delete()
+            for product_image_data in product_images_data:
+                ProductHaveImages.objects.create(product=instance, **product_image_data)
+
+        product_colors_data = validated_data.get('product_colors')
+        if product_colors_data:
+            instance.product_colors.clear()
+            for product_color_data in product_colors_data:
+                color_name = product_color_data.get('name')
+                try:
+                    color_instance = ProductHaveColor.objects.get(name=color_name)
+                except ProductHaveColor.DoesNotExist:
+                    color_instance = ProductHaveColor.objects.create(name=color_name)
+                instance.product_colors.add(color_instance)
+
+        instance.save()
+        return instance
 
     def get_url(self, obj):
         return obj.get_absolute_url()
