@@ -45,35 +45,31 @@ class ProductViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-        # data = request.data.copy()
-        # colors= data['colors']
-        # print(data)
-        # colors = json.loads(colors)
-        # print(colors)
-        # color_ids = get_or_create_color(colors)
-        # data['colors'] =  color_ids
-        # print(data['colors'])
-        # serializer = self.get_serializer(data=data)
-        # serializer.is_valid(raise_exception=True)
-        # self.perform_create(serializer)
-        # print(serializer.data)
-        # images = create_image(request.data.getlist('product_images'),serializer.data['id'])
-        # headers = self.get_success_headers(serializer.data)
-        # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
 
     @transaction.atomic
     def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        data = request.data.copy()
-        colors = data.pop('colors', [])  # Retrieve and remove colors from data
-        color_ids = get_or_create_color(colors)
-        data['colors'] = color_ids
-        serializer = self.get_serializer(instance, data=data, partial=True)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        images = create_image(request.data.get_list('product_images'), instance.id)
+        instance = serializer.save()
+        product_images = request.data.getlist('product_images', None)
+        if product_images:
+            images = create_image(Product, serializer.data['id'])
+        colors_data = request.data.get('colors', None)
+        if colors_data:
+            if isinstance(colors_data, str):
+                try:
+                    colors_data = json.loads(colors_data)
+                except json.JSONDecodeError:
+                    colors_data = []  # Handle the error or set to a default value as needed
+
+            if colors_data:
+                instance.save_colors(colors_data)
+
         return Response(serializer.data)
+    
         
 
         
