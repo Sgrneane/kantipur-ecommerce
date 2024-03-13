@@ -69,7 +69,7 @@ class ProductRetrieveSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields ='__all__'
+        exclude  = ['colors']
 
     def get_url(self, obj):
         return obj.get_absolute_url()

@@ -76,6 +76,15 @@ class Color(models.Model):
     name = models.CharField(max_length=32,unique=True)
     color_code =  models.CharField(max_length=16,null=True)
 
+
+class ColorManager(models.Manager):
+     def get_or_create_colors(self, colors):
+        colors = colors.split(',')
+        print(colors)
+        colors = [Color.objects.get_or_create(name=color)[0] for color in colors]
+        print(colors)
+        return colors
+
 #Class to store product
 class Product(models.Model):
     public_id = models.UUIDField(default=uuid.uuid4,editable=False,unique=True) 
@@ -93,17 +102,21 @@ class Product(models.Model):
     brand = models.ForeignKey(Brand,related_name = "products",on_delete = models.SET_NULL,null = True)
     created_date = models.DateTimeField(auto_now_add=True,null=True)
     updated_date = models.DateTimeField(auto_now=True,null=True)
-
+    objects = models.Manager()
     colors = models.ManyToManyField(Color,related_name='products')
+    color_manager = ColorManager()
     
-
-
     def __str__(self):
         return self.name
+    
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)+'-'+str(self.public_id)[1:5] + str(self.public_id)[-1:-5]
         super().save(*args, **kwargs)
+    
+    def save_colors(self, colors):
+        colors = Product.color_manager.get_or_create_colors(colors)
+        self.colors.set(colors)
 
     def get_absolute_url(self):
         return reverse('product-detail', kwargs={'slug': self.slug})
