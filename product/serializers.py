@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from account.models import CustomUser
-from .models import AccessoriesType, Brand, Category, Product, ProductHaveImages, ProductHaveColor
+from .models import AccessoriesType, Brand, Category, Product, ProductHaveImages, Color
 
 
 class AccessoriesTypeSerializer(serializers.ModelSerializer):
@@ -35,12 +35,10 @@ class CategorySerializer(serializers.ModelSerializer):
     
 
 
-class ProductHaveColorSerializer(serializers.ModelSerializer):
+class ColorSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = ProductHaveColor
-        fields='__all__'
-
+        model=Color
 
     def get_url(self, obj):
         return obj.get_absolute_url()
@@ -58,33 +56,20 @@ class ProductHaveImagesSerializer(serializers.ModelSerializer):
     
 
 
-class ProductSerializer(serializers.ModelSerializer):
-    product_images = serializers.ListField(child=serializers.ImageField(max_length=None, use_url=True))
-    product_colors = serializers.ListField(child=serializers.CharField(max_length=32))
-
+class ProductRetrieveSerializer(serializers.ModelSerializer):
+    product_images = ProductHaveImagesSerializer(many=True,read_only=True)
     class Meta:
         model = Product
         fields ='__all__'
 
-    def create(self, validated_data):
-        product_images_data = validated_data.pop('product_images', [])
-        product_colors_data = validated_data.pop('product_colors', [])
-        product_instance = Product.objects.create(**validated_data)
+    def get_url(self, obj):
+        return obj.get_absolute_url()
+    
 
-        for product_image_data in product_images_data:
-            try:
-                ProductHaveImages.objects.create(product=product_instance, image=product_image_data)
-            except ValidationError as e:
-                raise serializers.ValidationError({'product_images': e.message})
-
-        for product_color_data in product_colors_data:
-            try:
-                color_instance, created = ProductHaveColor.objects.get_or_create(name=product_color_data)
-                product_instance.product_colors.add(color_instance)
-            except ValidationError as e:
-                raise serializers.ValidationError({'product_colors': e.message})
-
-        return product_instance
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields ='__all__'
 
     def get_url(self, obj):
         return obj.get_absolute_url()

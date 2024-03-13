@@ -71,6 +71,11 @@ class Category(models.Model):
         return reverse('categories', kwargs={'slug': self.slug})
 
 
+#model to store product color
+class Color(models.Model):
+    name = models.CharField(max_length=32,unique=True)
+    color_code =  models.CharField(max_length=16,null=True)
+
 #Class to store product
 class Product(models.Model):
     public_id = models.UUIDField(default=uuid.uuid4,editable=False,unique=True) 
@@ -88,6 +93,8 @@ class Product(models.Model):
     brand = models.ForeignKey(Brand,related_name = "products",on_delete = models.SET_NULL,null = True)
     created_date = models.DateTimeField(auto_now_add=True,null=True)
     updated_date = models.DateTimeField(auto_now=True,null=True)
+
+    colors = models.ManyToManyField(Color,related_name='products')
     
 
 
@@ -101,15 +108,6 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse('product-detail', kwargs={'slug': self.slug})
 
-
-
-#Product Color description
-class ProductHaveColor(models.Model):
-    name = models.CharField(max_length=32)
-    product = models.ManyToManyField(Product,related_name = 'product_colors')
-
-    def __str__(self):
-        return str(self.name)
 
 #Class to store product images
 class ProductHaveImages(models.Model):
