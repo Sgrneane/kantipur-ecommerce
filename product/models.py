@@ -79,10 +79,7 @@ class Color(models.Model):
 
 class ColorManager(models.Manager):
      def get_or_create_colors(self, colors):
-        colors = colors.split(',')
-        print(colors)
         colors = [Color.objects.get_or_create(name=color)[0] for color in colors]
-        print(colors)
         return colors
 
 #Class to store product
