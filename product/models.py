@@ -33,7 +33,7 @@ class Brand(models.Model):
     name = models.CharField(max_length = 200,null=False)
     accessories = models.ManyToManyField(AccessoriesType)
     slug = models.SlugField(max_length=300,unique=True,blank=True)
-    image = models.ImageField(upload_to='products/Brand',default=None)
+    image = models.ImageField(upload_to='media/products/Brand',default=None)
     description =  models.CharField(max_length = 2000, null=True)
 
 
@@ -54,7 +54,7 @@ class Category(models.Model):
     public_id = models.UUIDField(default=uuid.uuid4,editable=False,unique=True)
     name = models.CharField(max_length = 200,null=False)
     slug = models.SlugField(max_length=300,unique=True,blank=True)
-    image = models.ImageField(upload_to='products/category',default=None, null=True)
+    image = models.ImageField(upload_to='media/products/category',default=None, null=True)
     description =  models.CharField(max_length = 2000,null=True)
 
 
@@ -94,7 +94,7 @@ class Product(models.Model):
     discount = models.DecimalField(default=0,max_digits=10, decimal_places=2)
     size = models.CharField(max_length=32,null=True)
     is_publish = models.BooleanField(default = False)
-    thumbnail_image = models.ImageField(upload_to='products/thumbnail_images',blank=True)
+    thumbnail_image = models.ImageField(upload_to='media/products/thumbnail_images',blank=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     accessory_type = models.ForeignKey(AccessoriesType,related_name='product_types',on_delete=models.SET_NULL,null=True)
@@ -126,7 +126,7 @@ class Product(models.Model):
 class ProductHaveImages(models.Model):
     public_id = models.UUIDField(default=uuid.uuid4,editable=False,unique=True)
     product = models.ForeignKey(Product,related_name = "product_images",on_delete = models.CASCADE)
-    image = models.ImageField(upload_to="products/images")
+    image = models.ImageField(upload_to="media/products/product_images")
 
     def __str__(self):
         return str(self.product.name) + ":" + str(self.id)
